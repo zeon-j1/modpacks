@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Modpacks</title>
+    <style>
+        body { font-family: sans-serif; padding: 32px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 10px 16px; text-align: left; }
+        th { background: #f4f4f4; }
+        a { color: #0070f3; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Modpacks</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Size</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody id="modpack-list">
+            <tr><td colspan="3">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + " B";
+            if (bytes < 1024 ** 2) return (bytes / 1024).toFixed(1) + " KB";
+            return (bytes / 1024 ** 2).toFixed(1) + " MB";
+        }
+
+        fetch("/api/modpacks")
+            .then(res => res.json())
+            .then(files => {
+                const tbody = document.getElementById("modpack-list");
+                if (!files.length) {
+                    tbody.innerHTML = "<tr><td colspan='3'>No files found.</td></tr>";
+                    return;
+                }
+                tbody.innerHTML = files.map(f => `
+          <tr>
+            <td>${f.name}</td>
+            <td>${formatSize(f.size)}</td>
+            <td><a href="/download/${encodeURIComponent(f.name)}">Download</a></td>
+          </tr>
+        `).join("");
+            })
+            .catch(() => {
+                document.getElementById("modpack-list").innerHTML =
+                    "<tr><td colspan='3'>Error loading files.</td></tr>";
+            });
+    </script>
+</body>
+</html>
