@@ -28,7 +28,6 @@ const storage = multer.diskStorage({
     }
 });
 
-/*
 // Allow only .zip and .mrpack files
 const upload = multer({
     storage,
@@ -42,7 +41,6 @@ const upload = multer({
         }
     }
 });
-*/
 
 // Admin auth middleware
 function requireAdmin(req, res, next) {
