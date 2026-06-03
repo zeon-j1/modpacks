@@ -13,6 +13,29 @@ if (!fs.existsSync(MODPACKS_DIR)) {
     fs.mkdirSync(MODPACKS_DIR, { recursive: true });
 }
 
+const multer = require("multer");
+
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, MODPACKS_DIR);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+function requireAdmin(req, res, next) {
+    if (req.query.token !== ADMIN_TOKEN) {
+        return res.status(403).send("Forbidden");
+    }
+
+    next();
+}
+
 app.use(express.static(__dirname));
 
 // API: list files
@@ -43,3 +66,12 @@ app.get("/download/:filename", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+app.post(
+    "/upload",
+    requireAdmin,
+    upload.single("modpack"),
+    (req, res) => {
+        res.send("Upload successful");
+    }
+);
