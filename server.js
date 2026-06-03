@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 function requireAdmin(req, res, next) {
-    if (req.headers["x-admin-token"] !== ADMIN_TOKEN) {
+    if (req.query.token !== ADMIN_TOKEN) {
         return res.status(403).send("Forbidden");
     }
 
