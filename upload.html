@@ -1,35 +1,21 @@
-<!DOCTYPE html>
-<html>
-<body>
-    <h1>Upload Modpack</h1>
+<script>
+const token = new URLSearchParams(window.location.search).get("token");
 
-    <form id="uploadForm">
-        <input type="file" name="modpack" required>
-        <button type="submit">Upload</button>
-    </form>
+document.getElementById("uploadForm")
+    .addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    <p id="status"></p>
+        const formData = new FormData(e.target);
 
-    <script>
-        const token = prompt("Admin Token:");
-    
-        document.getElementById("uploadForm")
-            .addEventListener("submit", async (e) => {
-                e.preventDefault();
-    
-            const formData = new FormData(e.target);
-    
-            const response = await fetch("/upload", {
-                    method: "POST",
-                    headers: {
-                        "x-admin-token": token
-                    },
-                    body: formData
-                });
-    
-                document.getElementById("status").textContent =
-                    await response.text();
-            });
-    </script>
-</body>
-</html>
+        const response = await fetch(
+            `/upload?token=${encodeURIComponent(token)}`,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        document.getElementById("status").textContent =
+            await response.text();
+    });
+</script>
