@@ -3,7 +3,14 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const MODPACKS_DIR = path.join(__dirname, "modpacks");
+const MODPACKS_DIR =
+    process.env.RENDER
+        ? "/data/modpacks"
+        : path.join(__dirname, "modpacks");
+
+if (!fs.existsSync(MODPACKS_DIR)) {
+    fs.mkdirSync(MODPACKS_DIR, { recursive: true });
+}
 
 app.use(express.static(__dirname));
 
