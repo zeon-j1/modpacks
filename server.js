@@ -29,18 +29,7 @@ const storage = multer.diskStorage({
 });
 
 // Allow only .zip and .mrpack files
-const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase();
-
-        if (ext === ".zip" || ext === ".mrpack") {
-            cb(null, true);
-        } else {
-            cb(new Error("Only .zip and .mrpack files are allowed."));
-        }
-    }
-});
+const upload = multer({ storage });
 
 // Admin auth middleware
 function requireAdmin(req, res, next) {
@@ -124,4 +113,22 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Modpacks directory: ${MODPACKS_DIR}`);
+});
+
+app.delete("/delete/:filename", requireAdmin, (req, res) => {
+    const filename = path.basename(req.params.filename);
+    const filePath = path.join(MODPACKS_DIR, filename);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send("File not found.");
+    }
+
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Failed to delete file.");
+        }
+
+        res.send("File deleted.");
+    });
 });
