@@ -17,6 +17,8 @@ const multer = require("multer");
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 
+console.log("ADMIN_TOKEN exists:", !!process.env.ADMIN_TOKEN);
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, MODPACKS_DIR);
