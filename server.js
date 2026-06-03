@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 const MODPACKS_DIR =
     process.env.RENDER
         ? "/data/modpacks"
@@ -33,7 +34,12 @@ app.get("/download/:filename", (req, res) => {
     const filename = path.basename(req.params.filename); // sanitize
     const filePath = path.join(MODPACKS_DIR, filename);
     if (!fs.existsSync(filePath)) return res.status(404).send("File not found.");
+    app.disable("x-powered-by");
+    res.set("Cache-Control", "public, max-age=3600");
+    
     res.download(filePath);
 });
 
-app.listen(3000, () => console.log("Running at http://localhost:3000"));
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
