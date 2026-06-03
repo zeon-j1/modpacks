@@ -1,59 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modpacks</title>
-    <style>
-        body { font-family: sans-serif; padding: 32px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 10px 16px; text-align: left; }
-        th { background: #f4f4f4; }
-        a { color: #0070f3; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Modpacks</h1>
-    <p>Modrinth Modpacks are .mrpack and Curseforge Modpacks are .zip<br>Prism Launcher accepts both types and is on Windows, macOS, and Linux</p>
-    <table>
-        <thead>
-            <tr>
-                <th>File Name</th>
-                <th>Size</th>
-                <th>Download</th>
-            </tr>
-        </thead>
-        <tbody id="modpack-list">
-            <tr><td colspan="3">Loading...</td></tr>
-        </tbody>
-    </table>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span id="themeLabel">Light</span>
+    </button>
+
+    <div class="container">
+        <header>
+            <p class="eyebrow">Modpack Repository</p>
+            <h1>MOD<span class="accent">PACKS</span></h1>
+            <p class="subtitle">
+                <strong>.mrpack</strong> files are Modrinth modpacks &mdash; <strong>.zip</strong> files are CurseForge modpacks.<br>
+                Prism Launcher accepts both formats on Windows, macOS &amp; Linux.
+            </p>
+            <div class="tags">
+                <span class="tag green">Modrinth .mrpack</span>
+                <span class="tag green">CurseForge .zip</span>
+                <span class="tag">Prism Launcher</span>
+            </div>
+        </header>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Size</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody id="modpack-list">
+                    <tr><td colspan="3" class="empty">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
+        // ── Theme toggle ──────────────────────────────────────────
+        const html = document.documentElement;
+        const themeLabel = document.getElementById("themeLabel");
+
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        html.setAttribute("data-theme", savedTheme);
+        themeLabel.textContent = savedTheme === "dark" ? "Light" : "Dark";
+
+        document.getElementById("themeToggle").addEventListener("click", () => {
+            const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            html.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
+            themeLabel.textContent = next === "dark" ? "Light" : "Dark";
+        });
+
+        // ── Modpack list ──────────────────────────────────────────
         function formatSize(bytes) {
             if (bytes < 1024) return bytes + " B";
             if (bytes < 1024 ** 2) return (bytes / 1024).toFixed(1) + " KB";
             return (bytes / 1024 ** 2).toFixed(1) + " MB";
         }
 
+        const dlIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+
         fetch("/api/modpacks")
             .then(res => res.json())
             .then(files => {
                 const tbody = document.getElementById("modpack-list");
                 if (!files.length) {
-                    tbody.innerHTML = "<tr><td colspan='3'>No files found.</td></tr>";
+                    tbody.innerHTML = `<tr><td colspan="3" class="empty">No modpacks found.</td></tr>`;
                     return;
                 }
-                tbody.innerHTML = files.map(f => `
-          <tr>
-            <td>${f.name}</td>
-            <td>${formatSize(f.size)}</td>
-            <td><a href="/download/${encodeURIComponent(f.name)}">Download</a></td>
-          </tr>
-        `).join("");
+                tbody.innerHTML = files.map((f, i) => `
+                    <tr style="animation-delay:${i * 0.05}s">
+                        <td>${f.name}</td>
+                        <td>${formatSize(f.size)}</td>
+                        <td><a class="dl-btn" href="/download/${encodeURIComponent(f.name)}">${dlIcon} Download</a></td>
+                    </tr>
+                `).join("");
             })
             .catch(() => {
                 document.getElementById("modpack-list").innerHTML =
-                    "<tr><td colspan='3'>Error loading files.</td></tr>";
+                    `<tr><td colspan="3" class="error">⚠ Error loading files.</td></tr>`;
             });
     </script>
 </body>
