@@ -36,6 +36,14 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+function requireAdmin(req, res, next) {
+    if (req.headers["x-admin-token"] !== ADMIN_TOKEN) {
+        return res.status(403).send("Forbidden");
+    }
+
+    next();
+}
+
 app.use(express.static(__dirname));
 
 // API: list files
@@ -61,6 +69,10 @@ app.get("/download/:filename", (req, res) => {
     res.set("Cache-Control", "public, max-age=3600");
     
     res.download(filePath);
+});
+
+app.get("/upload", requireAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, "upload.html"));
 });
 
 app.listen(PORT, () => {
