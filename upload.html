@@ -12,21 +12,21 @@
 
     <script>
         const token = prompt("Admin Token:");
-
+    
         document.getElementById("uploadForm")
             .addEventListener("submit", async (e) => {
                 e.preventDefault();
-
-                const formData = new FormData(e.target);
-
-                const response = await fetch("/upload", {
+    
+            const formData = new FormData(e.target);
+    
+            const response = await fetch("/upload", {
                     method: "POST",
                     headers: {
                         "x-admin-token": token
                     },
                     body: formData
                 });
-
+    
                 document.getElementById("status").textContent =
                     await response.text();
             });
